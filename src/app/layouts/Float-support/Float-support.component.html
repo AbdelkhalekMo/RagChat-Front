@@ -1,0 +1,27 @@
+<div class="float-support-container">
+  <!-- Tooltip -->
+  <div class="tooltip" [class.show]="isHovered">
+    <span class="tooltip-text">انقر هنا للحديث مع المساعد الذكي</span>
+    <div class="tooltip-arrow"></div>
+  </div>
+  
+  <!-- Floating Button -->
+  <button 
+    class="float-button"
+    (mouseenter)="onMouseEnter()"
+    (mouseleave)="onMouseLeave()"
+    (click)="navigateToChat()"
+    [class.hovered]="isHovered"
+  >
+    <div class="button-content">
+      <div class="chatbot-icon">
+        <span class="icon-emoji">🤖</span>
+        <div class="pulse-ring"></div>
+        <div class="pulse-ring-2"></div>
+      </div>
+      <div class="button-text" *ngIf="isHovered">
+        <span>المساعد الذكي</span>
+      </div>
+    </div>
+  </button>
+</div>

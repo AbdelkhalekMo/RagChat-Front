@@ -1,0 +1,181 @@
+<div class="container mt-4">
+  <div class="card">
+    <div class="card-header">
+      <h4 class="mb-0">إضافة فاتورة جديدة</h4>
+    </div>
+    <div class="card-body">
+      <form [formGroup]="invoiceForm" (ngSubmit)="onSubmit()">
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <label for="invoiceNumber" class="form-label">رقم الفاتورة *</label>
+            <input
+              type="text"
+              class="form-control"
+              id="invoiceNumber"
+              formControlName="invoiceNumber"
+              [class.is-invalid]="invoiceForm.get('invoiceNumber')?.invalid && invoiceForm.get('invoiceNumber')?.touched"
+            >
+            <div class="invalid-feedback">
+              رقم الفاتورة مطلوب
+            </div>
+          </div>
+          <div class="col-md-6">
+            <label for="date" class="form-label">التاريخ *</label>
+            <input
+              type="date"
+              class="form-control"
+              id="date"
+              formControlName="date"
+              [class.is-invalid]="invoiceForm.get('date')?.invalid && invoiceForm.get('date')?.touched"
+            >
+            <div class="invalid-feedback">
+              التاريخ مطلوب
+            </div>
+          </div>
+        </div>
+
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <label for="customerName" class="form-label">اسم العميل *</label>
+            <input
+              type="text"
+              class="form-control"
+              id="customerName"
+              formControlName="customerName"
+              [class.is-invalid]="invoiceForm.get('customerName')?.invalid && invoiceForm.get('customerName')?.touched"
+            >
+            <div class="invalid-feedback">
+              اسم العميل مطلوب
+            </div>
+          </div>
+          <div class="col-md-6">
+            <label for="status" class="form-label">الحالة *</label>
+            <select
+              class="form-select"
+              id="status"
+              formControlName="status"
+              [class.is-invalid]="invoiceForm.get('status')?.invalid && invoiceForm.get('status')?.touched"
+            >
+              <option value="">اختر الحالة</option>
+              <option value="Draft">مسودة</option>
+              <option value="Issued">مرسلة</option>
+              <option value="Paid">مدفوعة</option>
+              <option value="Overdue">متأخرة</option>
+            </select>
+            <div class="invalid-feedback">
+              الحالة مطلوبة
+            </div>
+          </div>
+        </div>
+
+        <div class="row mb-3" *ngIf="invoiceForm.get('status')?.value === 'Paid'">
+          <div class="col-md-6">
+            <label for="paymentDate" class="form-label">تاريخ الدفع</label>
+            <input
+              type="date"
+              class="form-control"
+              id="paymentDate"
+              formControlName="paymentDate"
+            >
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <h5>تفاصيل الفاتورة</h5>
+            <button type="button" class="btn btn-secondary btn-sm" (click)="addDetail()">
+              إضافة عنصر
+            </button>
+          </div>
+          
+          <div formArrayName="details">
+            <div *ngFor="let detail of detailsArray.controls; let i = index" 
+                 [formGroupName]="i" 
+                 class="card mb-2">
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-md-4">
+                    <label class="form-label">العنصر *</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      formControlName="item"
+                      [class.is-invalid]="detail.get('item')?.invalid && detail.get('item')?.touched"
+                    >
+                    <div class="invalid-feedback">
+                      العنصر مطلوب
+                    </div>
+                  </div>
+                  <div class="col-md-3">
+                    <label class="form-label">الكمية *</label>
+                    <input
+                      type="number"
+                      class="form-control"
+                      formControlName="quantity"
+                      min="1"
+                      (input)="calculateTotal()"
+                      [class.is-invalid]="detail.get('quantity')?.invalid && detail.get('quantity')?.touched"
+                    >
+                    <div class="invalid-feedback">
+                      الكمية مطلوبة
+                    </div>
+                  </div>
+                  <div class="col-md-3">
+                    <label class="form-label">السعر *</label>
+                    <input
+                      type="number"
+                      class="form-control"
+                      formControlName="price"
+                      min="0"
+                      step="0.01"
+                      (input)="calculateTotal()"
+                      [class.is-invalid]="detail.get('price')?.invalid && detail.get('price')?.touched"
+                    >
+                    <div class="invalid-feedback">
+                      السعر مطلوب
+                    </div>
+                  </div>
+                  <div class="col-md-2">
+                    <label class="form-label"> </label>
+                    <button
+                      type="button"
+                      class="btn btn-danger btn-sm d-block"
+                      (click)="removeDetail(i)"
+                      [disabled]="detailsArray.length === 1"
+                    >
+                      حذف
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <div class="total-amount-card">
+            <div class="total-content">
+              <div class="total-label">
+                <span class="total-icon">💰</span>
+                الإجمالي:
+              </div>
+              <div class="total-value">{{ totalAmount | currency:'EGP':'symbol':'1.2-2' }}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-between">
+          <!-- <button type="button" class="btn btn-secondary" (click)="goBack()">
+            إلغاء
+          </button> -->
+          <button
+            type="submit"
+            class="btn btn-primary"
+            [disabled]="invoiceForm.invalid || isSubmitting"
+          >
+            {{ isSubmitting ? 'جاري الحفظ...' : 'حفظ الفاتورة' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>

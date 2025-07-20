@@ -1,0 +1,116 @@
+<div class="chat-container">
+  <!-- Chat Header -->
+  <div class="chat-header">
+    <div class="header-content">
+      <div class="header-left">
+        <h4 class="mb-0">
+          🤖 Invoice Assistant Chatbot
+        </h4>
+        <small class="text-light">      اسأل عن فواتيرك - Ask about your invoices</small>
+      </div>
+      <div class="header-right">
+        <div class="language-selector">
+          <button class="btn btn-outline-light btn-sm" 
+                  (click)="setLanguage('en')"
+                  [class.active]="selectedLanguage === 'en'">
+            English
+          </button>
+          <button class="btn btn-outline-light btn-sm" 
+                  (click)="setLanguage('ar')"
+                  [class.active]="selectedLanguage === 'ar'">
+            العربية
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chat Messages Container -->
+  <div class="chat-messages-container">
+    <div class="messages-wrapper" #messagesContainer>
+      <!-- Welcome Message -->
+      <div class="welcome-message" *ngIf="messages.length === 0">
+        <div class="welcome-card">
+          <div class="welcome-icon">👋</div>
+          <h5>{{ selectedLanguage === 'ar' ? 'مرحباً بك!' : 'Welcome!' }}</h5>
+          <p>
+            {{ selectedLanguage === 'ar' 
+               ? 'اسأل عن فواتيرك - مثل: "كم عدد الفواتير؟" أو "إجمالي الفواتير هذا الشهر"'
+               : 'Ask about your invoices - like: "How many invoices?" or "Total invoices this month"'
+            }}
+          </p>
+        </div>
+      </div>
+
+      <!-- Chat Messages -->
+      <div *ngFor="let message of messages; trackBy: trackByMessageId" 
+           class="message-item" 
+           [ngClass]="{'user-message': message.isUser, 'bot-message': !message.isUser}">
+        
+        <!-- User Message -->
+        <div *ngIf="message.isUser" class="message-wrapper user-wrapper">
+          <div class="chat-bubble user-bubble">
+            <div class="message-content">{{ message.content }}</div>
+            <div class="message-time">{{ message.timestamp | date:'short' }}</div>
+          </div>
+        </div>
+
+        <!-- Bot Message -->
+        <div *ngIf="!message.isUser" class="message-wrapper bot-wrapper">
+          <div class="bot-avatar">
+            🤖
+          </div>
+          <div class="chat-bubble bot-bubble">
+            <div class="message-content">{{ message.content }}</div>
+            <div class="message-time">{{ message.timestamp | date:'short' }}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Loading Indicator -->
+      <div *ngIf="isLoading" class="message-item bot-message">
+        <div class="message-wrapper bot-wrapper">
+          <div class="bot-avatar">
+            🤖
+          </div>
+          <div class="chat-bubble bot-bubble loading-bubble">
+            <div class="typing-indicator">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+            <div class="loading-text">
+              {{ selectedLanguage === 'ar' ? 'جاري المعالجة...' : 'Processing...' }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chat Input -->
+    <div class="chat-input-container">
+      <div class="input-wrapper">
+        <input 
+          type="text" 
+          class="message-input" 
+          [(ngModel)]="currentMessage"
+          (ngModelChange)="onInputChange()"
+          (keyup.enter)="sendMessage()"
+          [placeholder]="selectedLanguage === 'ar' ? 'اكتب سؤالك هنا...' : 'Type your question here...'"
+          [disabled]="isLoading"
+          #messageInput
+        >
+        <button 
+          class="send-button" 
+          type="button" 
+          (click)="sendMessage()"
+          [disabled]="isLoading || !currentMessage.trim()">
+          <i class="bi bi-send-fill send-icon" *ngIf="!isLoading"></i>
+          <i class="bi bi-hourglass-split loading-spinner" *ngIf="isLoading"></i>
+        </button>
+      </div>
+      
+
+    </div>
+  </div>
+</div>
