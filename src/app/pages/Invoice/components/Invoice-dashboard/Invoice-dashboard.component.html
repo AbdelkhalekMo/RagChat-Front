@@ -424,9 +424,9 @@
               <input 
                 type="date" 
                 class="form-control" 
-                [(ngModel)]="editForm.date" 
+                [ngModel]="formatDateForInput(editForm.date)"
+                (change)="onDateChange($event, 'date')"
                 name="date"
-                [value]="editForm.date ? (editForm.date | date:'yyyy-MM-dd') : ''"
                 required>
             </div>
             
@@ -447,6 +447,7 @@
                 class="form-select" 
                 [(ngModel)]="editForm.status" 
                 name="status"
+                (ngModelChange)="onStatusChange($event)"
                 required>
                 <option [value]="InvoiceStatus.Draft">مسودة</option>
                 <option [value]="InvoiceStatus.Issued">مرسلة</option>
@@ -460,9 +461,9 @@
               <input 
                 type="date" 
                 class="form-control" 
-                [(ngModel)]="editForm.paymentDate" 
-                name="paymentDate"
-                [value]="editForm.paymentDate ? (editForm.paymentDate | date:'yyyy-MM-dd') : ''">
+                [ngModel]="formatDateForInput(editForm.paymentDate)"
+                (change)="onDateChange($event, 'paymentDate')"
+                name="paymentDate">
             </div>
           </div>
           <div class="modal-footer">

@@ -186,15 +186,25 @@ export class InvoicesDashboardComponent implements OnInit {
   // Edit invoice
   editInvoice(invoice: InvoiceDTO): void {
     this.editingInvoice = invoice;
+    
+    // Convert date strings to Date objects for the form
+    const invoiceDate = typeof invoice.date === 'string' ? new Date(invoice.date) : invoice.date;
+    const paymentDate = invoice.paymentDate ? 
+      (typeof invoice.paymentDate === 'string' ? new Date(invoice.paymentDate) : invoice.paymentDate) : 
+      undefined;
+    
+
+    
     this.editForm = {
       invoiceNumber: invoice.invoiceNumber,
       customerName: invoice.customerName,
-      date: new Date(invoice.date),
+      date: invoiceDate,
       total: invoice.total,
       status: invoice.status,
-      paymentDate: invoice.paymentDate ? new Date(invoice.paymentDate) : undefined,
+      paymentDate: paymentDate,
       invoiceDetails: invoice.invoiceDetails?.map(d => ({ ...d })) || []
     };
+    
     this.showModal('editInvoiceModal');
   }
 
@@ -234,6 +244,31 @@ export class InvoicesDashboardComponent implements OnInit {
     this.editingInvoice = null;
     this.editForm = {};
     this.hideModal('editInvoiceModal');
+  }
+
+  // Handle status change in edit form
+  onStatusChange(newStatus: InvoiceStatus): void {
+    this.editForm.status = newStatus;
+    
+    // Clear payment date if status is not Paid
+    if (newStatus !== InvoiceStatus.Paid) {
+      this.editForm.paymentDate = undefined;
+    }
+  }
+
+  // Helper method to handle date change
+  onDateChange(event: any, field: 'date' | 'paymentDate'): void {
+    const value = event?.target?.value;
+    if (value) {
+      try {
+        this.editForm[field] = new Date(value);
+      } catch (error) {
+        console.error('Error parsing date:', error);
+        this.editForm[field] = undefined;
+      }
+    } else {
+      this.editForm[field] = undefined;
+    }
   }
 
   // Delete invoice
@@ -308,6 +343,21 @@ export class InvoicesDashboardComponent implements OnInit {
 
   trackByInvoice(index: number, invoice: InvoiceDTO): number {
     return invoice.id;
+  }
+
+  // Helper method to format date for input field
+  formatDateForInput(date: Date | string | undefined): string {
+    if (!date) return '';
+    
+    try {
+      const dateObj = typeof date === 'string' ? new Date(date) : date;
+      if (isNaN(dateObj.getTime())) return '';
+      
+      const formattedDate = dateObj.toISOString().split('T')[0]; // Returns YYYY-MM-DD format
+      return formattedDate;
+    } catch {
+      return '';
+    }
   }
 
   // Modal helper methods
